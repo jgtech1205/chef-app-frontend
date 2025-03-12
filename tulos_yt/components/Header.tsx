@@ -9,6 +9,6 @@ const Header = () => {
    <Logo />
    <div>right</div>
   </header>;
-}
+};
 
 export default Header;
