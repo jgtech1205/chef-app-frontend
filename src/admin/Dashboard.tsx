@@ -9,7 +9,7 @@ import {
   Download,
   CreditCard
 } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 interface RestaurantStats {
   total: number;
