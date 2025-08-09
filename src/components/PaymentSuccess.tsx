@@ -58,10 +58,46 @@ export function PaymentSuccess() {
       }
 
       const result = await response.json();
-      return result.success;
+
+      if (result.success) {
+        // Auto-login the user
+        dispatch(setCredentials({
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        }));
+
+        // Fetch restaurant information and set organization name
+        try {
+          const restaurantResponse = await fetch(`${apiUrl}/restaurant/head-chef/my-restaurant`, {
+            headers: {
+              'Authorization': `Bearer ${result.accessToken}`,
+            },
+          });
+          
+          if (restaurantResponse.ok) {
+            const restaurantData = await restaurantResponse.json();
+            localStorage.setItem('organizationName', restaurantData.data.name);
+          }
+        } catch (error) {
+          console.error('Failed to fetch restaurant info:', error);
+        }
+
+        setStatus('success');
+        setMessage('Payment successful! Your account has been created.');
+        
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      } else {
+        setStatus('error');
+        setMessage(result.error || 'Failed to verify payment');
+      }
     } catch (error) {
-      console.error('Error verifying session:', error);
-      return false;
+      console.error('Session verification error:', error);
+      setStatus('error');
+      setMessage('Failed to verify payment session');
     }
   };
 
