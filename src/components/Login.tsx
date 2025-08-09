@@ -28,7 +28,7 @@ export function Login({ locale, onLoginSuccess, organizationId }: LoginProps) {
   const [isQrMode, setIsQrMode] = useState(false);
 
   const [login, { isLoading: loginLoading }] = useLoginMutation();
-  const [qrAuth, { isLoading: qrLoading }] = useQrAuthMutation();
+  const [qrAuth] = useQrAuthMutation();
 
   // Check if this is a QR access attempt (has organizationId)
   useEffect(() => {

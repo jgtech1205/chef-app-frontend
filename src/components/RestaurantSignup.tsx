@@ -158,7 +158,7 @@ export function RestaurantSignup({ locale: _ }: RestaurantSignupProps) {
       }
 
       // Create checkout session
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
       const response = await fetch(`${apiUrl}/stripe/create-checkout-session`, {
         method: 'POST',
         headers: {

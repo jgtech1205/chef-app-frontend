@@ -50,7 +50,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'https://chef-app-be.vercel.app',
         changeOrigin: true,
         secure: false,
       },
