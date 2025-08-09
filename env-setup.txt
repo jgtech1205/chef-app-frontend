@@ -1,0 +1,3 @@
+# Copy this content to a new file called .env in the chefenplace-web directory
+
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here 
