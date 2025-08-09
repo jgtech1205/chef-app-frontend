@@ -150,7 +150,7 @@ const transformNotification = (
 });
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
+      baseUrl: import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api',
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.accessToken;
     if (token) {

@@ -53,7 +53,7 @@ const CustomLayout = (props: CustomLayoutProps) => (
 const authProvider = {
   login: async ({ username, password }: LoginCredentials): Promise<LoginResponse> => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
@@ -85,7 +85,7 @@ const authProvider = {
   logout: async () => {
     try {
       // Call the logout API endpoint
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
       await fetch(`${apiUrl}/auth/logout`, {
         method: 'POST',
         headers: {

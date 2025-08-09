@@ -146,7 +146,7 @@ export const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
       const response = await fetch(`${apiUrl}/restaurant/super-admin/stats`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,

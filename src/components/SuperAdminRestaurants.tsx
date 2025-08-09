@@ -38,7 +38,7 @@ export const SuperAdminRestaurants: React.FC = () => {
 
   const fetchRestaurants = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
       const token = localStorage.getItem('accessToken');
       
       const response = await fetch(`${apiUrl}/restaurant/super-admin/restaurants`, {

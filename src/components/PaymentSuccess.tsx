@@ -42,7 +42,7 @@ export function PaymentSuccess() {
         cleanSessionId = cleanSessionId.replace(/cs\s+test/g, 'cs_test');
       }
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app';
       const fullUrl = `${apiUrl}/api/stripe/verify-session`;
 
       const response = await fetch(fullUrl, {

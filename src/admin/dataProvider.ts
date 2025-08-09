@@ -1,6 +1,6 @@
 import { DataProvider, fetchUtils } from 'react-admin';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
 
 interface HttpClientOptions {
   method?: string;

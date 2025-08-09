@@ -84,8 +84,8 @@ export function Login({ locale, onLoginSuccess, organizationId }: LoginProps) {
 
       // Fetch restaurant information and set organization name
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-        const restaurantResponse = await fetch(`${apiUrl}/restaurant/head-chef/my-restaurant`, {
+                  const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
+          const restaurantResponse = await fetch(`${apiUrl}/restaurant/head-chef/my-restaurant`, {
           headers: {
             'Authorization': `Bearer ${result.accessToken}`,
           },
