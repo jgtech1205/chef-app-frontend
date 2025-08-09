@@ -9,6 +9,7 @@ import {
   Download,
   CreditCard
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 interface RestaurantStats {
   total: number;
@@ -163,6 +164,14 @@ export const Dashboard = () => {
     }
   };
 
+  const handleExport = () => {
+    toast.info('Export functionality coming soon!');
+  };
+
+  const handleBilling = () => {
+    toast.info('Billing overview coming soon!');
+  };
+
   if (loading) {
     return <div style={{ padding: '20px' }}>Loading dashboard...</div>;
   }
@@ -311,10 +320,7 @@ export const Dashboard = () => {
                 fontWeight: '500',
                 transition: 'all 0.2s ease-in-out'
               }}
-              onClick={() => {
-                // Export functionality could go here
-                alert('Export functionality coming soon!');
-              }}
+              onClick={handleExport}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#047857'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#059669'}
             >
@@ -337,10 +343,7 @@ export const Dashboard = () => {
                 fontWeight: '500',
                 transition: 'all 0.2s ease-in-out'
               }}
-              onClick={() => {
-                // Billing overview could go here
-                alert('Billing overview coming soon!');
-              }}
+              onClick={handleBilling}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d97706'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f59e0b'}
             >

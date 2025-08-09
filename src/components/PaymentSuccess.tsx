@@ -19,9 +19,6 @@ export function PaymentSuccess() {
     const sessionId = searchParams.get('session_id') || searchParams.get('sid');
     const success = searchParams.get('success');
 
-    console.log('Raw session ID from URL:', sessionId);
-    console.log('Success param:', success);
-
     if (!sessionId || success !== 'true') {
       setStatus('error');
       setMessage('Invalid payment session');
@@ -30,82 +27,41 @@ export function PaymentSuccess() {
 
     // Decode the session ID in case it's URL encoded
     const decodedSessionId = decodeURIComponent(sessionId);
-    console.log('Decoded session ID:', decodedSessionId);
 
     // Force fix the session ID - replace any spaces with underscores
     const cleanSessionId = decodedSessionId.replace(/cs\s+test/g, 'cs_test');
-    console.log('Clean session ID for verification:', cleanSessionId);
 
     verifySession(cleanSessionId);
   }, [searchParams]);
 
   const verifySession = async (sessionId: string) => {
     try {
-      console.log('Session ID received in verifySession:', sessionId);
-      
-      // Double-check and fix the session ID
+      // Clean up session ID if it contains "cs test" (common URL encoding issue)
       let cleanSessionId = sessionId;
       if (cleanSessionId.includes('cs test')) {
         cleanSessionId = cleanSessionId.replace(/cs\s+test/g, 'cs_test');
-        console.log('Fixed session ID (replaced cs test):', cleanSessionId);
       }
-      
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-      const fullUrl = `${apiUrl}/stripe/verify-session/${cleanSessionId}`;
-      
-      console.log('API URL from env:', import.meta.env.VITE_API_URL);
-      console.log('Constructed API URL:', apiUrl);
-      console.log('Final request URL:', fullUrl);
-      
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const fullUrl = `${apiUrl}/api/stripe/verify-session`;
+
       const response = await fetch(fullUrl, {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ sessionId: cleanSessionId }),
       });
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        // Auto-login the user
-        dispatch(setCredentials({
-          user: result.user,
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-        }));
-
-        // Fetch restaurant information and set organization name
-        try {
-          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-          const restaurantResponse = await fetch(`${apiUrl}/restaurant/head-chef/my-restaurant`, {
-            headers: {
-              'Authorization': `Bearer ${result.accessToken}`,
-            },
-          });
-          
-          if (restaurantResponse.ok) {
-            const restaurantData = await restaurantResponse.json();
-            localStorage.setItem('organizationName', restaurantData.data.name);
-          }
-        } catch (error) {
-          console.error('Failed to fetch restaurant info:', error);
-        }
-
-        setStatus('success');
-        setMessage('Payment successful! Your account has been created.');
-        
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 2000);
-      } else {
-        setStatus('error');
-        setMessage(result.error || 'Failed to verify payment');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const result = await response.json();
+      return result.success;
     } catch (error) {
-      console.error('Session verification error:', error);
-      setStatus('error');
-      setMessage('Failed to verify payment session');
+      console.error('Error verifying session:', error);
+      return false;
     }
   };
 

@@ -4,6 +4,20 @@ import { RestaurantList } from './RestaurantList';
 import { RestaurantShow } from './RestaurantShow';
 import { Dashboard } from './Dashboard';
 
+interface LoginCredentials {
+  username: string;
+  password: string;
+}
+
+interface LoginResponse {
+  accessToken: string;
+  user: any; // This could be typed more specifically if needed
+}
+
+interface CustomLayoutProps {
+  children: React.ReactNode;
+}
+
 // Custom App Bar with Super Admin branding
 const CustomAppBar = () => (
   <AppBar>
@@ -31,13 +45,13 @@ const CustomAppBar = () => (
 );
 
 // Custom Layout with our branded app bar
-const CustomLayout = (props: any) => (
+const CustomLayout = (props: CustomLayoutProps) => (
   <Layout {...props} appBar={CustomAppBar} />
 );
 
 // Auth provider for React Admin
 const authProvider = {
-  login: async ({ username, password }: any) => {
+  login: async ({ username, password }: LoginCredentials): Promise<LoginResponse> => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
       const response = await fetch(`${apiUrl}/auth/login`, {
@@ -107,7 +121,7 @@ const authProvider = {
     return Promise.resolve();
   },
 
-  checkError: (error: any) => {
+  checkError: (error: { status?: number; message?: string }) => {
     const status = error.status;
     if (status === 401 || status === 403) {
       localStorage.removeItem('accessToken');

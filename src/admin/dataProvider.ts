@@ -2,7 +2,17 @@ import { DataProvider, fetchUtils } from 'react-admin';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
-const httpClient = (url: string, options: any = {}) => {
+interface HttpClientOptions {
+  method?: string;
+  body?: any;
+  headers?: Headers;
+}
+
+interface QueryParams {
+  [key: string]: string | number | boolean;
+}
+
+const httpClient = (url: string, options: HttpClientOptions = {}) => {
   // Add auth token to all requests
   const token = localStorage.getItem('accessToken');
   if (token) {
@@ -16,7 +26,7 @@ export const dataProvider: DataProvider = {
   getList: (resource, params) => {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
-    const query: Record<string, any> = {
+    const query: QueryParams = {
       page: page,
       limit: perPage,
     };
@@ -41,7 +51,7 @@ export const dataProvider: DataProvider = {
     }));
   },
 
-  getMany: (resource, params) => {
+  getMany: (resource: string, params: { ids: string[] }) => {
     const query = {
       ids: JSON.stringify(params.ids),
     };
@@ -52,7 +62,7 @@ export const dataProvider: DataProvider = {
     }));
   },
 
-  getManyReference: (resource, params) => {
+  getManyReference: (resource: string, params: { target: string; id: string }) => {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
     const query = {
@@ -77,7 +87,7 @@ export const dataProvider: DataProvider = {
       body: JSON.stringify(params.data),
     }).then(({ json }) => ({ data: json.data })),
 
-  updateMany: (resource, params) => {
+  updateMany: (resource: string, params: { ids: string[]; data: any }) => {
     const query = {
       ids: JSON.stringify(params.ids),
     };
@@ -100,7 +110,7 @@ export const dataProvider: DataProvider = {
       method: 'DELETE',
     }).then(({ json }) => ({ data: json })),
 
-  deleteMany: (resource, params) => {
+  deleteMany: (resource: string, params: { ids: string[] }) => {
     const query = {
       ids: JSON.stringify(params.ids),
     };

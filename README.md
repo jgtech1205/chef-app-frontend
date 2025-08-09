@@ -1,69 +1,101 @@
-# React + TypeScript + Vite
+# Chef en Place - Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive web application for restaurant management and chef collaboration, built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **User Authentication & Authorization** - Secure login system with role-based access control
+- **Recipe Management** - Create, edit, and organize recipes with AI-powered ingredient extraction
+- **Panel Management** - Organize recipes into customizable panels for different meal services
+- **Team Collaboration** - Manage team members and assign roles within restaurants
+- **Real-time Notifications** - Stay updated with important alerts and announcements
+- **Multi-language Support** - English and Spanish localization
+- **Responsive Design** - Optimized for desktop and mobile devices
+- **PWA Ready** - Progressive Web App capabilities for mobile users
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend Framework**: React 19 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Redux Toolkit
+- **Routing**: React Router DOM
+- **UI Components**: Custom components with Lucide React icons
+- **Payment Integration**: Stripe
+- **Admin Panel**: React Admin
+- **Internationalization**: Custom i18n solution
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📦 Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/jgtech1205/chef-app-frontend.git
+   cd chef-app-frontend/chefenplace-web
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Environment Setup**
+   - Copy `env-setup.txt` to `.env`
+   - Update the environment variables with your configuration
+
+4. **Start development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+## 🔧 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run generate-pwa-assets` - Generate PWA assets
+
+## 🌐 Environment Variables
+
+Create a `.env` file with the following variables:
+
+```env
+VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+VITE_API_URL=your_backend_api_url
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📱 PWA Features
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The application includes Progressive Web App capabilities:
+- Offline support
+- Installable on mobile devices
+- Push notifications (when configured)
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🎨 Design System
+
+- **Color Palette**: Professional slate grays with warm accent colors
+- **Typography**: Clean, readable fonts optimized for kitchen environments
+- **Components**: Consistent UI components following modern design principles
+
+## 🔒 Security
+
+- JWT-based authentication
+- Role-based access control
+- Secure API communication
+- Environment variable protection
+
+## 📄 License
+
+This project is proprietary software. All rights reserved.
+
+## 🤝 Contributing
+
+For internal development team use only. Please follow the established coding standards and review process.
+
+## 📞 Support
+
+For technical support or questions, please contact the development team.

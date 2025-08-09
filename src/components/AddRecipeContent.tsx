@@ -43,7 +43,6 @@ export function AddRecipeContent({ locale }: AddRecipeContentProps) {
         const response = await uploadIngredientImage(file).unwrap();
         toast.dismiss();
         toast.success('Ingredients extracted!');
-        console.log('AI ingredients:', response);
         const raw = response?.data?.ingredients || '';
         const cleaned = raw.replaceAll(/[\n\r]+/g, '\n').trim();
         setIngredientsText(cleaned);

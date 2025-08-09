@@ -53,9 +53,27 @@ export function EmailVerification({ locale }: EmailVerificationProps) {
     navigate('/login');
   };
 
-  const handleResendVerification = () => {
-    // This would need to be implemented - resend verification email
-    console.log('Resend verification email');
+  const handleResendVerification = async () => {
+    try {
+      setResendLoading(true);
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        toast.success('Verification email sent!');
+      } else {
+        toast.error('Failed to send verification email');
+      }
+    } catch (error) {
+      toast.error('Failed to send verification email');
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   const renderContent = () => {
