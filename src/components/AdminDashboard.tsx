@@ -65,7 +65,8 @@ export function AdminDashboard({}: AdminDashboardProps) {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/restaurant/super-admin/stats', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
+      const response = await fetch(`${apiUrl}/restaurant/super-admin/stats`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
@@ -91,7 +92,7 @@ export function AdminDashboard({}: AdminDashboardProps) {
         ...(statusFilter !== 'all' && { status: statusFilter }),
       });
 
-      const response = await fetch(`/api/restaurant/super-admin/restaurants?${params}`, {
+      const response = await fetch(`${apiUrl}/restaurant/super-admin/restaurants?${params}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },

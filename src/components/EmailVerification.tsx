@@ -31,8 +31,9 @@ export function EmailVerification({ locale }: EmailVerificationProps) {
   }, [token]);
 
   const verifyEmail = async (verificationToken: string) => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
     try {
-      const response = await fetch(`/api/restaurant/verify-email/${verificationToken}`);
+      const response = await fetch(`${apiUrl}/restaurant/verify-email/${verificationToken}`);
       const result = await response.json();
 
       if (response.ok) {
@@ -56,7 +57,7 @@ export function EmailVerification({ locale }: EmailVerificationProps) {
   const handleResendVerification = async () => {
     try {
       setResendLoading(true);
-      const response = await fetch('/api/auth/resend-verification', {
+      const response = await fetch(`${apiUrl}/auth/resend-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
