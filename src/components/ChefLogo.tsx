@@ -4,3 +4,4 @@ export function ChefLogo() {
     <img src={Logo} alt="Chef en Place Logo" width={480}  />
   )
 }
+//
