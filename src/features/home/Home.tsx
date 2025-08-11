@@ -1,4 +1,4 @@
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation } from https://chef-app-frontend.vercel.app/'@/lib/i18n';
 import { ChefLogo } from '@/components/ChefLogo';
 
 export default function Home() {

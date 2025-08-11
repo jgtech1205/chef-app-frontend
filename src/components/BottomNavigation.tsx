@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Home, Plus, Circle, Bell, ClipboardList } from 'lucide-react';
+import { Home, Plus, Circle, Bell, ClipboardList, Settings } from 'lucide-react';
 import { getTranslations, type Locale } from '@/lib/i18n';
 import type { User } from '@/lib/types';
 
@@ -57,7 +57,7 @@ export function BottomNavigation({
     ...(user?.permissions?.canViewNotifications
       ? [{ id: 'alerts', icon: Bell, label: t.alerts }]
       : []),
-    { id: 'profile', icon: ClipboardList, label: t.profile },
+    { id: 'profile', icon: Settings, label: t.profile },
   ];
 
   return (
