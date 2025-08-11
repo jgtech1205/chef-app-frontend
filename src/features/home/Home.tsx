@@ -1,4 +1,5 @@
 import { useTranslation } from '@/lib/i18n';
+import { ChefLogo } from '@/components/ChefLogo';
 
 export default function Home() {
   const { t } = useTranslation();
@@ -7,6 +8,9 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
+          <div className="flex justify-center mb-8">
+            <ChefLogo />
+          </div>
           <h1 className="text-5xl font-bold text-white mb-6">
             {t.welcomeToChefEnPlace}
           </h1>
