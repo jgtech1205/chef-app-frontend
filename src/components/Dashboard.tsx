@@ -235,7 +235,7 @@ export function Dashboard({
                 <div className='animate-spin rounded-full h-full w-full border-4 border-[#D4B896] border-t-transparent'></div>
               </div>
               <p className='text-xl md:text-2xl text-gray-500 font-medium'>
-                {t.loadingPanels}
+                {t.loading}
               </p>
             </div>
           ) : showSearchResults ? (
