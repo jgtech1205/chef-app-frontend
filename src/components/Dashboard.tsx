@@ -46,16 +46,25 @@ export function Dashboard({
   const getRestaurantName = () => {
     // First try localStorage
     const storedName = localStorage.getItem('organizationName');
+    console.log('Restaurant name sources:', {
+      storedName,
+      userOrganization: user?.organization,
+      user: user
+    });
+    
     if (storedName && storedName !== 'Organization' && storedName !== 'restaurant') {
+      console.log('Using stored name:', storedName);
       return storedName;
     }
     
     // Then try user organization (it's a string, not an object)
     if (user?.organization && user.organization !== 'restaurant') {
+      console.log('Using user organization:', user.organization);
       return user.organization;
     }
     
     // Fallback to a more descriptive name
+    console.log('Using fallback name: my-restaurant');
     return 'my-restaurant';
   };
   

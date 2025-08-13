@@ -68,16 +68,28 @@ export function RestaurantLogin({ locale, onLoginSuccess }: RestaurantLoginProps
       onLoginSuccess?.();
     } catch (error: any) {
       console.error('Login error:', error);
+      console.error('Error details:', {
+        status: error?.status,
+        data: error?.data,
+        message: error?.message,
+        originalStatus: error?.originalStatus
+      });
       
       // Handle different error cases
-      if (error?.data?.status === 'pending') {
+      if (error?.status === 404 || error?.originalStatus === 404) {
+        toast.error('Login service is currently unavailable. Please contact your restaurant manager for access.');
+      } else if (error?.data?.status === 'pending') {
         toast.error('Your access request is still pending approval. Please contact the restaurant manager.');
       } else if (error?.data?.status === 'rejected') {
         toast.error('Your access request has been rejected. Please contact the restaurant manager.');
       } else if (error?.data?.message) {
         toast.error(error.data.message);
+      } else if (error?.status === 500 || error?.originalStatus === 500) {
+        toast.error('Server error. Please try again later.');
+      } else if (error?.status === 401 || error?.originalStatus === 401) {
+        toast.error('Invalid credentials. Please check your name and try again.');
       } else {
-        toast.error('Login failed. Please check your name and try again.');
+        toast.error('Login service is currently unavailable. Please contact your restaurant manager.');
       }
     }
   };
@@ -141,6 +153,13 @@ export function RestaurantLogin({ locale, onLoginSuccess }: RestaurantLoginProps
           <p className="text-slate-500 text-xs mt-2">
             If you haven't been added to the team, please contact your restaurant manager.
           </p>
+          
+          {/* Backend Status Notice */}
+          <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+            <p className="text-yellow-400 text-xs">
+              ⚠️ Note: The login service is currently being updated. If you encounter issues, please contact your restaurant manager for assistance.
+            </p>
+          </div>
         </div>
       </div>
     </div>
