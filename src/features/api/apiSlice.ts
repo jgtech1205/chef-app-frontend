@@ -321,14 +321,13 @@ export const apiSlice = createApi({
     }),
 
     qrAuth: builder.mutation<
-      { user: User; accessToken: string; refreshToken: string; restaurant: any },
+      { loginUrl: string; restaurantName: string },
       { orgId: string }
     >({
       query: ({ orgId }) => ({
         url: `/auth/qr/${orgId}`,
         method: 'POST',
       }),
-      invalidatesTags: [{ type: 'Auth', id: 'SESSION' }],
     }),
 
     register: builder.mutation<
@@ -373,6 +372,18 @@ export const apiSlice = createApi({
         method: 'POST',
         body,
       }),
+    }),
+
+    loginByName: builder.mutation<
+      { user: User; accessToken: string; refreshToken: string },
+      { restaurantName: string; firstName: string; lastName: string }
+    >({
+      query: (body) => ({
+        url: '/auth/login-by-name',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Auth', id: 'SESSION' }],
     }),
 
     requestChefAccess: builder.mutation<
@@ -768,7 +779,10 @@ export const apiSlice = createApi({
           : [{ type: 'User', id: 'PENDING_LIST' }],
     }),
 
-    updatePendingRequest: builder.mutation<void, { id: string; status: 'active' | 'rejected' }>({
+    updatePendingRequest: builder.mutation<
+      { success: boolean; message: string; loginUrl?: string },
+      { id: string; status: 'active' | 'rejected' }
+    >({
       query: ({ id, status }) => ({
         url: `/users/pending-chefs/${id}`,
         method: 'PUT',
@@ -819,6 +833,7 @@ export const {
   useUploadIngredientImageMutation,
   useLoginMutation,
   useLoginChefMutation,
+  useLoginByNameMutation,
   useQrAuthMutation,
   useRegisterMutation,
   useRefreshTokenMutation,

@@ -10,6 +10,7 @@ import { getTranslations, type Locale } from '@/lib/i18n';
 import { useAppDispatch } from '@/app/hooks';
 import { setCredentials } from '@/features/auth/authSlice';
 import { useLoginMutation, useQrAuthMutation } from '@/features/api/apiSlice';
+import { Users, Building2, ArrowRight, QrCode } from 'lucide-react';
 
 interface LoginProps {
   locale: Locale;
@@ -26,6 +27,8 @@ export function Login({ locale, onLoginSuccess, organizationId }: LoginProps) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isQrMode, setIsQrMode] = useState(false);
+  const [loginMode, setLoginMode] = useState<'head-chef' | 'team-member'>('head-chef');
+  const [restaurantName, setRestaurantName] = useState('');
 
   const [login, { isLoading: loginLoading }] = useLoginMutation();
   const [qrAuth] = useQrAuthMutation();
@@ -45,15 +48,11 @@ export function Login({ locale, onLoginSuccess, organizationId }: LoginProps) {
     try {
       const result = await qrAuth({ orgId: organizationId }).unwrap();
       
-      dispatch(setCredentials({
-        user: result.user,
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-      }));
-
-      toast.success('Welcome to the restaurant!');
-      navigate('/dashboard');
-      onLoginSuccess?.();
+      // Show success message that they're being redirected
+      toast.success(`Redirecting to ${result.restaurantName} login page...`);
+      
+      // Redirect to the restaurant-specific login page
+      window.location.href = result.loginUrl;
     } catch (error) {
       console.error('QR authentication error:', error);
       toast.error('Failed to access restaurant. Please contact the head chef.');
@@ -84,8 +83,8 @@ export function Login({ locale, onLoginSuccess, organizationId }: LoginProps) {
 
       // Fetch restaurant information and set organization name
       try {
-                  const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
-          const restaurantResponse = await fetch(`${apiUrl}/restaurant/head-chef/my-restaurant`, {
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
+        const restaurantResponse = await fetch(`${apiUrl}/restaurant/head-chef/my-restaurant`, {
           headers: {
             'Authorization': `Bearer ${result.accessToken}`,
           },
@@ -110,6 +109,16 @@ export function Login({ locale, onLoginSuccess, organizationId }: LoginProps) {
     }
   };
 
+  const handleTeamMemberLogin = () => {
+    if (!restaurantName.trim()) {
+      toast.error('Please enter a restaurant name');
+      return;
+    }
+    
+    const formattedName = restaurantName.toLowerCase().replace(/\s+/g, '-');
+    navigate(`/login/${formattedName}`);
+  };
+
   if (isQrMode && isLoading) {
     return (
       <div className="min-h-screen bg-[#0F1A24] flex flex-col items-center justify-center p-4">
@@ -117,7 +126,7 @@ export function Login({ locale, onLoginSuccess, organizationId }: LoginProps) {
           <ChefLogo />
           <div className="mt-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4B896] mx-auto"></div>
-            <p className="text-white mt-4">Accessing restaurant...</p>
+            <p className="text-white mt-4">Getting restaurant login page...</p>
           </div>
         </div>
       </div>
@@ -128,43 +137,133 @@ export function Login({ locale, onLoginSuccess, organizationId }: LoginProps) {
     <div className="min-h-screen bg-[#0F1A24] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto">
         <ChefLogo />
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-          <Input
-            type="email"
-            placeholder={t.email}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-14 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 text-lg focus:border-[#D4B896] focus:ring-[#D4B896]"
-            required
-          />
-          <Input
-            type="password"
-            placeholder={t.password}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full h-14 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 text-lg focus:border-[#D4B896] focus:ring-[#D4B896]"
-            required
-          />
-          <Button
-            type="submit"
-            disabled={isLoading || loginLoading}
-            className="w-full h-14 bg-[#D4B896] text-[#0F1A24] hover:bg-[#C4A886] text-lg font-semibold"
-          >
-            {isLoading || loginLoading ? 'Signing in...' : t.signIn}
-          </Button>
-        </form>
-
-        <div className="text-center mt-6">
-          <p className="text-slate-400">
-            {t.dontHaveAccount}{' '}
+        
+        {/* Login Mode Toggle */}
+        <div className="mt-8 mb-6">
+          <div className="bg-slate-800 rounded-lg p-1 flex">
             <button
-              onClick={() => navigate('/signup')}
-              className="text-[#D4B896] hover:underline"
+              onClick={() => setLoginMode('head-chef')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
+                loginMode === 'head-chef'
+                  ? 'bg-[#D4B896] text-[#0F1A24]'
+                  : 'text-slate-400 hover:text-white'
+              }`}
             >
-              {t.signUp}
+              <Building2 className="w-4 h-4" />
+              Head Chef
             </button>
-          </p>
+            <button
+              onClick={() => setLoginMode('team-member')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
+                loginMode === 'team-member'
+                  ? 'bg-[#D4B896] text-[#0F1A24]'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              Team Member
+            </button>
+          </div>
         </div>
+
+        {/* Head Chef Login Section */}
+        {loginMode === 'head-chef' && (
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-semibold text-white mb-2">Head Chef Login</h2>
+              <p className="text-slate-400 text-sm">
+                Access your restaurant dashboard with email and password
+              </p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                type="email"
+                placeholder={t.email}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-12 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-[#D4B896] focus:ring-[#D4B896]"
+                required
+              />
+              <Input
+                type="password"
+                placeholder={t.password}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-12 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-[#D4B896] focus:ring-[#D4B896]"
+                required
+              />
+              <Button
+                type="submit"
+                disabled={isLoading || loginLoading}
+                className="w-full h-12 bg-[#D4B896] text-[#0F1A24] hover:bg-[#C4A886] font-semibold"
+              >
+                {isLoading || loginLoading ? 'Signing in...' : t.signIn}
+              </Button>
+            </form>
+
+            <div className="text-center pt-4 border-t border-slate-700">
+              <p className="text-slate-400 text-sm">
+                {t.dontHaveAccount}{' '}
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="text-[#D4B896] hover:underline"
+                >
+                  {t.signUp}
+                </button>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Team Member Login Section */}
+        {loginMode === 'team-member' && (
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-semibold text-white mb-2">Team Member Access</h2>
+              <p className="text-slate-400 text-sm">
+                Enter your restaurant name to access the team login page
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <Input
+                type="text"
+                placeholder="Restaurant name (e.g., Joe's Pizza)"
+                value={restaurantName}
+                onChange={(e) => setRestaurantName(e.target.value)}
+                className="w-full h-12 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-[#D4B896] focus:ring-[#D4B896]"
+              />
+              
+              <Button
+                onClick={handleTeamMemberLogin}
+                disabled={!restaurantName.trim()}
+                className="w-full h-12 bg-[#D4B896] text-[#0F1A24] hover:bg-[#C4A886] font-semibold flex items-center justify-center gap-2"
+              >
+                Go to Restaurant Login
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="bg-slate-800 rounded-lg p-4 mt-6">
+              <div className="flex items-start gap-3">
+                <QrCode className="w-5 h-5 text-[#D4B896] mt-0.5 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="text-white font-medium mb-1">QR Code Access</p>
+                  <p className="text-slate-400">
+                    Team members can also scan a QR code provided by their head chef to access the restaurant login page directly.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center pt-4 border-t border-slate-700">
+              <p className="text-slate-400 text-sm">
+                Need help? Contact your head chef for access instructions.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

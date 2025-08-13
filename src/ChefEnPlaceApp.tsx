@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { LanguageSelection } from '@/components/LanguageSelection';
 import { Login } from '@/components/Login';
+import { RestaurantLogin } from '@/components/RestaurantLogin';
 import { Dashboard } from '@/components/Dashboard';
 import { AddRecipeContent } from '@/components/AddRecipeContent';
 
@@ -238,6 +239,20 @@ export default function ChefEnPlaceApp() {
               <Navigate to={user?.role === 'super-admin' ? '/super-admin' : '/dashboard'} replace />
             ) : (
               <Login
+                locale={selectedLocale}
+                onLoginSuccess={handleLoginSuccess}
+              />
+            )
+          }
+        />
+
+        <Route
+          path='/login/:restaurantName'
+          element={
+            isAuth ? (
+              <Navigate to={user?.role === 'super-admin' ? '/super-admin' : '/dashboard'} replace />
+            ) : (
+              <RestaurantLogin
                 locale={selectedLocale}
                 onLoginSuccess={handleLoginSuccess}
               />

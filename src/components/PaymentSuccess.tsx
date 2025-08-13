@@ -42,15 +42,58 @@ export function PaymentSuccess() {
         cleanSessionId = cleanSessionId.replace(/cs\s+test/g, 'cs_test');
       }
 
-      // For now, we'll just show success since the webhook should handle the actual verification
-      // The backend webhook will process the payment and create the account
-      setStatus('success');
-      setMessage('Payment successful! Your account is being created. Please check your email for login details.');
-      
-      // Redirect to login after a short delay
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://chef-app-be.vercel.app/api';
+      const fullUrl = `${apiUrl}/stripe/verify-session`;
+
+      const response = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId: cleanSessionId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Auto-login the user
+        dispatch(setCredentials({
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        }));
+
+        // Fetch restaurant information and set organization name
+        try {
+          const restaurantResponse = await fetch(`${apiUrl}/restaurant/head-chef/my-restaurant`, {
+            headers: {
+              'Authorization': `Bearer ${result.accessToken}`,
+            },
+          });
+          
+          if (restaurantResponse.ok) {
+            const restaurantData = await restaurantResponse.json();
+            localStorage.setItem('organizationName', restaurantData.data.name);
+          }
+        } catch (error) {
+          console.error('Failed to fetch restaurant info:', error);
+        }
+
+        setStatus('success');
+        setMessage('Payment successful! Your account has been created.');
+        
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      } else {
+        setStatus('error');
+        setMessage(result.error || 'Failed to verify payment');
+      }
     } catch (error) {
       console.error('Session verification error:', error);
       setStatus('error');

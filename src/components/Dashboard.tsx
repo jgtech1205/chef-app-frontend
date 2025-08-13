@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { Search, Plus, Utensils, MoreVertical, Edit, Trash2, X } from 'lucide-react';
+import { Search, Plus, Utensils, MoreVertical, Edit, Trash2, X, QrCode, Copy, Download, Users } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { getTranslations, type Locale } from '@/lib/i18n';
 import type { RecipeCategory, Panel, Recipe } from '@/lib/types';
 import { useGetPanelsQuery, useGetRecipesQuery, useUpdatePanelMutation, useDeletePanelMutation, useGetPlateupsQuery } from '@/features/api/apiSlice';
 import { useAppSelector } from '@/app/hooks';
 import { useNavigate } from 'react-router-dom';
+import QRCode from 'react-qr-code';
 
 function useDebouncedValue<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -56,6 +58,52 @@ export function Dashboard({
   const [editError, setEditError] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+
+  // QR Code states
+  const [showQrModal, setShowQrModal] = useState(false);
+
+  // Generate restaurant login URL
+  const restaurantLoginUrl = useMemo(() => {
+    const baseUrl = window.location.origin;
+    const formattedName = organizationName.toLowerCase().replace(/\s+/g, '-');
+    return `${baseUrl}/login/${formattedName}`;
+  }, [organizationName]);
+
+  // Copy to clipboard function
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Login URL copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  // Download QR code as image
+  const downloadQrCode = () => {
+    const svg = document.getElementById('qr-code-svg');
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx?.drawImage(img, 0, 0);
+      
+      const pngFile = canvas.toDataURL('image/png');
+      const downloadLink = document.createElement('a');
+      downloadLink.download = `${organizationName}-login-qr.png`;
+      downloadLink.href = pngFile;
+      downloadLink.click();
+    };
+
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+  };
 
   // Panel handlers
   const handlePanelDeleteClick = (panel: { id: string; name: string }) => {
@@ -207,12 +255,23 @@ export function Dashboard({
   return (
     <div className='min-h-screen'>
       <div className='bg-[#0F1A24] px-4 py-1 md:px-8 md:py-8'>
-        <div className='max-w-4xl mx-auto flex justify-center'>
+        <div className='max-w-4xl mx-auto flex justify-between items-center'>
           <div className='flex items-center space-x-2'>
             <h2 className='text-white text-xl md:text-2xl font-medium'>
               {organizationName}
             </h2>
           </div>
+          
+          {/* QR Code Button for Head Chefs */}
+          {user?.role === 'head-chef' && (
+            <Button
+              onClick={() => setShowQrModal(true)}
+              className='bg-[#D4B896] text-[#0F1A24] hover:bg-[#C4A886] px-4 py-2 rounded-lg flex items-center gap-2'
+            >
+              <QrCode className='w-4 h-4' />
+              Team Access
+            </Button>
+          )}
         </div>
       </div>
 
@@ -575,6 +634,89 @@ export function Dashboard({
             className='max-h-full max-w-full object-contain'
           />
         </button>
+      )}
+
+      {/* QR Code Modal */}
+      {showQrModal && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4'>
+          <div className='bg-white rounded-xl w-full max-w-md p-6 space-y-6'>
+            <div className='flex justify-between items-center'>
+              <h2 className='text-xl font-semibold text-gray-800'>Team Member Access</h2>
+              <button 
+                onClick={() => setShowQrModal(false)}
+                className='p-1 hover:bg-gray-100 rounded-full'
+              >
+                <X className='w-5 h-5 text-gray-500' />
+              </button>
+            </div>
+
+            <div className='text-center space-y-4'>
+              <div className='flex justify-center'>
+                <div className='bg-white p-4 rounded-lg border-2 border-gray-200'>
+                  <QRCode
+                    id="qr-code-svg"
+                    value={restaurantLoginUrl}
+                    size={200}
+                    level="M"
+                    fgColor="#0F1A24"
+                    bgColor="#FFFFFF"
+                  />
+                </div>
+              </div>
+
+              <div className='space-y-3'>
+                <h3 className='text-lg font-medium text-gray-800'>Restaurant Login URL</h3>
+                <div className='flex items-center gap-2 p-3 bg-gray-50 rounded-lg'>
+                  <Input
+                    value={restaurantLoginUrl}
+                    readOnly
+                    className='flex-1 text-sm bg-transparent border-none focus:ring-0'
+                  />
+                  <Button
+                    onClick={() => copyToClipboard(restaurantLoginUrl)}
+                    className='bg-[#D4B896] text-[#0F1A24] hover:bg-[#C4A886] p-2'
+                    size="sm"
+                  >
+                    <Copy className='w-4 h-4' />
+                  </Button>
+                </div>
+              </div>
+
+              <div className='flex gap-2 justify-center'>
+                <Button
+                  onClick={downloadQrCode}
+                  className='bg-[#0F1A24] text-white hover:bg-gray-800 flex items-center gap-2'
+                >
+                  <Download className='w-4 h-4' />
+                  Download QR Code
+                </Button>
+                <Button
+                  onClick={() => copyToClipboard(restaurantLoginUrl)}
+                  className='bg-[#D4B896] text-[#0F1A24] hover:bg-[#C4A886] flex items-center gap-2'
+                >
+                  <Copy className='w-4 h-4' />
+                  Copy URL
+                </Button>
+              </div>
+            </div>
+
+            <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+              <div className='flex items-start gap-3'>
+                <Users className='w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0' />
+                <div className='text-sm text-blue-800'>
+                  <h4 className='font-medium mb-2'>How to share with team members:</h4>
+                  <ul className='space-y-1 text-left'>
+                    <li>• Print or display the QR code in your kitchen</li>
+                    <li>• Share the login URL via email or messaging</li>
+                    <li>• Team members can scan the QR code or visit the URL</li>
+                    <li>• They'll be redirected to a name-based login page</li>
+                    <li>• No passwords required - just first and last name</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

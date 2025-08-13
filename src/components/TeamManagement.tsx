@@ -63,6 +63,7 @@ export function TeamManagement({ locale }: TeamManagementProps) {
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [permissionModal, setPermissionModal] = useState<string | null>(null);
+  const [approvalSuccessModal, setApprovalSuccessModal] = useState<{ name: string; loginUrl: string } | null>(null);
   const [permState, setPermState] = useState<UserPermissions>({
     canViewRecipes: false,
     canEditRecipes: false,
@@ -185,9 +186,14 @@ export function TeamManagement({ locale }: TeamManagementProps) {
       .catch(() => toast.error('Failed to update permissions'));
   };
 
-  const qrValue = user?.id
-    ? `${window.location.origin}/qr/${user.id}`
-    : `${window.location.origin}/qr/placeholder`;
+  // Show approval success modal with login instructions
+  const showApprovalSuccessModal = (memberName: string, loginUrl: string) => {
+    setApprovalSuccessModal({ name: memberName, loginUrl });
+  };
+
+  // Generate QR code URL for restaurant-specific login
+  const restaurantName = restaurant?.name?.toLowerCase().replace(/\s+/g, '-') || 'restaurant';
+  const qrValue = `${window.location.origin}/qr/${user?.id || 'placeholder'}`;
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -382,10 +388,27 @@ export function TeamManagement({ locale }: TeamManagementProps) {
                       onClick={() => {
                         updatePendingRequest({ id: request.id, status: 'active' })
                           .unwrap()
-                          .then(() => {
-                            toast.success(`${request.name} approved!`);
+                          .then((result) => {
+                            console.log('Approval result:', result);
+                            
+                            // Check if loginUrl is present in the response
+                            if (result.loginUrl) {
+                              // Show success message with login instructions
+                              toast.success(`${request.name} approved successfully!`, {
+                                duration: 5000,
+                              });
+                              
+                              // Show login URL and instructions
+                              showApprovalSuccessModal(request.name, result.loginUrl);
+                            } else {
+                              // Just a status update, not a new approval
+                              toast.success(`${request.name} approved!`);
+                            }
                           })
-                          .catch(() => toast.error('Failed to approve request'));
+                          .catch((error) => {
+                            console.error('Approval failed:', error);
+                            toast.error('Failed to approve request');
+                          });
                       }}
                       className='px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors flex items-center gap-1'
                     >
@@ -419,7 +442,7 @@ export function TeamManagement({ locale }: TeamManagementProps) {
             <User2 className='w-5 h-5 text-[#0F1A24]' /> {t.invite}
           </h2>
           <div className='text-center mt-6'>
-            <p className='text-sm text-gray-600 mb-2'>{t.shareQrInvite}</p>
+            <p className='text-sm text-gray-600 mb-2'>Team members scan this QR code to access the restaurant login page</p>
             <div
               className='mt-2 inline-block bg-white p-4 rounded-xl border border-gray-200 shadow-sm'
               id='invite-qr-code'
@@ -490,8 +513,7 @@ export function TeamManagement({ locale }: TeamManagementProps) {
             </div>
           </div>
           <p className='text-xs text-gray-400 text-center mt-2'>
-            Share this QR code or link to invite new team members to your
-            organization.
+            Share this QR code with team members. When scanned, they'll be redirected to the restaurant login page where they can enter their name to access the dashboard.
           </p>
         </section>
 
@@ -983,6 +1005,71 @@ export function TeamManagement({ locale }: TeamManagementProps) {
                   className='px-4 py-2 rounded-lg bg-[#0F1A24] text-white text-sm hover:bg-[#1a2535] transition-colors'
                 >
                   {t.save}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Approval Success Modal */}
+        {approvalSuccessModal && (
+          <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4'>
+            <div className='bg-white rounded-xl w-full max-w-md p-6 space-y-4'>
+              <div className='text-center'>
+                <CheckCircle className='w-12 h-12 text-green-500 mx-auto mb-4' />
+                <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+                  {approvalSuccessModal.name} Approved!
+                </h3>
+                <p className='text-sm text-gray-600 mb-4'>
+                  Team member has been successfully approved and can now access the restaurant dashboard.
+                </p>
+              </div>
+
+              <div className='bg-blue-50 p-4 rounded-lg border border-blue-200'>
+                <h4 className='text-sm font-semibold text-blue-800 mb-2'>Login Instructions:</h4>
+                <ol className='text-xs text-blue-700 space-y-1 list-decimal list-inside'>
+                  <li>Share this login URL with {approvalSuccessModal.name}</li>
+                  <li>They should visit the login page and enter their first and last name</li>
+                  <li>Once logged in, they'll have access to the restaurant dashboard</li>
+                </ol>
+              </div>
+
+              <div className='bg-gray-50 p-3 rounded-lg border border-gray-200'>
+                <div className='flex items-center justify-between'>
+                  <div className='flex-1'>
+                    <span className='text-xs text-gray-500'>Login URL:</span>
+                    <div className='font-mono text-xs text-gray-700 break-all mt-1'>
+                      {approvalSuccessModal.loginUrl}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(approvalSuccessModal.loginUrl);
+                      toast.success('Login URL copied to clipboard!');
+                    }}
+                    className='ml-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors flex items-center gap-1'
+                  >
+                    <Copy className='w-3 h-3' />
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div className='flex gap-3 pt-4 border-t'>
+                <button
+                  onClick={() => setApprovalSuccessModal(null)}
+                  className='flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    window.open(approvalSuccessModal.loginUrl, '_blank');
+                    setApprovalSuccessModal(null);
+                  }}
+                  className='flex-1 px-4 py-2 bg-[#0F1A24] text-white rounded-lg hover:bg-[#1a2535] transition-colors'
+                >
+                  Open Login Page
                 </button>
               </div>
             </div>
