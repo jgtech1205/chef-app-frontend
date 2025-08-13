@@ -41,10 +41,25 @@ export function Dashboard({
   const [updatePanel] = useUpdatePanelMutation();
   const [deletePanel] = useDeletePanelMutation();
   const user = useAppSelector((state) => state.auth.user);
-  const organizationName =
-    typeof localStorage !== 'undefined'
-      ? localStorage.getItem('organizationName') || 'Organization'
-      : 'Organization';
+  
+  // Get the actual restaurant name from multiple sources
+  const getRestaurantName = () => {
+    // First try localStorage
+    const storedName = localStorage.getItem('organizationName');
+    if (storedName && storedName !== 'Organization' && storedName !== 'restaurant') {
+      return storedName;
+    }
+    
+    // Then try user organization (it's a string, not an object)
+    if (user?.organization && user.organization !== 'restaurant') {
+      return user.organization;
+    }
+    
+    // Fallback to a more descriptive name
+    return 'my-restaurant';
+  };
+  
+  const organizationName = getRestaurantName();
   const navigate = useNavigate();
 
   // Panel menu and edit states
@@ -66,8 +81,18 @@ export function Dashboard({
   const restaurantLoginUrl = useMemo(() => {
     const baseUrl = window.location.origin;
     const formattedName = organizationName.toLowerCase().replace(/\s+/g, '-');
-    return `${baseUrl}/login/${formattedName}`;
-  }, [organizationName]);
+    const finalUrl = `${baseUrl}/login/${formattedName}`;
+    
+    // Debug logging
+    console.log('QR Code URL Generation:', {
+      organizationName,
+      formattedName,
+      finalUrl,
+      userOrganization: user?.organization
+    });
+    
+    return finalUrl;
+  }, [organizationName, user?.organization]);
 
   // Copy to clipboard function
   const copyToClipboard = async (text: string) => {
@@ -675,7 +700,6 @@ export function Dashboard({
                   <Button
                     onClick={() => copyToClipboard(restaurantLoginUrl)}
                     className='bg-[#D4B896] text-[#0F1A24] hover:bg-[#C4A886] p-2'
-                    size="sm"
                   >
                     <Copy className='w-4 h-4' />
                   </Button>

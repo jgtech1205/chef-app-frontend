@@ -184,11 +184,7 @@ export default function ChefEnPlaceApp() {
             isAuth ? (
               <Navigate to={user?.role === 'super-admin' ? '/super-admin' : '/dashboard'} replace />
             ) : (
-              <Login
-                locale={selectedLocale}
-                onLoginSuccess={handleLoginSuccess}
-                organizationId={window.location.pathname.split('/')[2]}
-              />
+              <Navigate to={`/login/${window.location.pathname.split('/')[2]}`} replace />
             )
           }
         />

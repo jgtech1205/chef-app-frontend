@@ -26,6 +26,14 @@ export function RestaurantLogin({ locale, onLoginSuccess }: RestaurantLoginProps
   const [lastName, setLastName] = useState('');
   const [loginByName, { isLoading }] = useLoginByNameMutation();
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('RestaurantLogin component mounted');
+    console.log('URL restaurantName:', restaurantName);
+    console.log('Current URL:', window.location.href);
+    console.log('Pathname:', window.location.pathname);
+  }, [restaurantName]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
